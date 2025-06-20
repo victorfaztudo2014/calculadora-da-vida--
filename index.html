@@ -118,13 +118,13 @@
       { anos: [2006, 2007, 2008], texto: 'Você se identifica com algo escrito abaixo? Nível Hard de não se identificar. Discovery Kids reinava com Backyardigans, Peixonauta e Pocoyo. TV Cultura que parece existir desde sempre. Baby Alive, Beyblades, Hot Wheels, DVDs e CDs. Chiquititas e Carrossel paravam o Brasil. Professora Helena, Suzana, e o medo da bruxa Carmen! Você teve uma infância memorável.' },
       { anos: [1999, 2000, 2001, 2002, 2003, 2004, 2005], texto: 'Você lembra de quando a tecnologia ainda estava começando a tomar conta de tudo? TV Globinho, Bom Dia & Cia, TV Cultura, Cocoricó, Teletubbies, Dragon Ball Z, Chaves, DVDs e CDs. Brinquedos como Power Rangers, Hello Kitty, Meninas Superpoderosas, Moranguinho e Hot Wheels. Tênis de rodinha. A era de Carrossel, Chiquititas e Frozen. Instagram mal existia. Você guarda consigo memórias pré-evolucionárias da tecnologia!' },
       { anos: [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998], texto: 'Olá? Adulto quase na casa dos 30 é?? TV Cultura, Castelo Rá-Tim-Bum, Mundo da Lua e Xou da Xuxa. Hot Wheels e Barbies. Super Nintendo, Megadrive, CD e fita cassete. Bom Dia & Cia, Disney Channel, Nickelodeon, brinquedos simples e doces clássicos. Você teve uma infância incrível!' },
-      { anos: [1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989], texto: 'Sente, sente bem aí, por que te recordarei da sua infância. Xou da Xuxa, Carrossel (versão antiga), Chiquititas, Cúmplices de um Resgate. Programa do Silvio Santos, Balão Mágico. Brincadeiras clássicas: pique-pega, polícia e ladrão, bolinha de gude, cinco marias, pião, pular corda. Caverna do Dragão, Scooby-Doo, Chaves, tênis All Star, Super Mario Bros, fita cassete, Rei Leão. A adrenalina era 1000, fizemos coisas que hoje não deixaríamos nossos filhos fazerem nem perto!' }
+      { anos: [1980, 1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989], texto: 'Sente, sente bem aí, porque te recordarei da sua infância. Xou da Xuxa, Carrossel (versão antiga), Chiquititas, Cúmplices de um Resgate. Programa do Silvio Santos, Balão Mágico. Brincadeiras clássicas: pique-pega, polícia e ladrão, bolinha de gude, cinco marias, pião, pular corda. Caverna do Dragão, Scooby-Doo, Chaves, tênis All Star, Super Mario Bros, fita cassete, Rei Leão. A adrenalina era 1000, fizemos coisas que hoje não deixaríamos nossos filhos fazerem nem perto!' }
     ];
 
     function calcular() {
       const nascimentoStr = document.getElementById('dataNascimento').value;
-      const adiantado = document.getElementById('adiantado').checked;
-      const repeticoes = parseInt(document.getElementById('repeticoes').value);
+      const adiantadoEl = document.getElementById('adiantado');
+      const repeticoesEl = document.getElementById('repeticoes');
       const memoriaValor = parseInt(document.getElementById('memoria').value);
       const resultado = document.getElementById('resultado');
 
@@ -140,7 +140,7 @@
       const anoAtual = hoje.getFullYear();
       const ano = nascimento.getFullYear();
 
-      if (ano > 2025) {
+      if (ano > anoAtual) {
         resultado.classList.remove('show');
         resultado.innerHTML = 'Queimem o bruxo que veio do futuro!';
         setTimeout(() => resultado.classList.add('show'), 50);
@@ -155,11 +155,22 @@
       }
 
       let idade = anoAtual - ano;
-      const jaFezAniversario = (
+      const jaFezAniversario =
         hoje.getMonth() > nascimento.getMonth() ||
-        (hoje.getMonth() === nascimento.getMonth() && hoje.getDate() >= nascimento.getDate())
-      );
+        (hoje.getMonth() === nascimento.getMonth() && hoje.getDate() >= nascimento.getDate());
       if (!jaFezAniversario) idade--;
+
+      // Bloqueia campos se muito novo
+      if (idade < 6) {
+        adiantadoEl.disabled = true;
+        repeticoesEl.disabled = true;
+      } else {
+        adiantadoEl.disabled = false;
+        repeticoesEl.disabled = false;
+      }
+
+      const adiantado = adiantadoEl.checked;
+      const repeticoes = parseInt(repeticoesEl.value);
 
       let geracao = 'Desconhecida';
       if (ano >= 1946 && ano <= 1964) geracao = 'Geração W';
@@ -180,20 +191,29 @@
       } else if (tempoNaEscola < 9) {
         escolaridade = `Você está aproximadamente no ${tempoNaEscola + 1}º ano do Ensino Fundamental.`;
       } else if (tempoNaEscola < 12) {
-        escolaridade = `Você está aproximadamente na ${tempoNaEscola - 8}ª série do Ensino Médio.`;
+        escolaridade = `Você está aproximadamente no ${tempoNaEscola - 8}º ano do Ensino Médio.`;
       } else {
         escolaridade = 'Você provavelmente já terminou a escola... ou pulou a cerca 📚✌️';
       }
 
       const faixa = faixas.find(f => f.anos.includes(ano));
       let textoFaixa = faixa ? `<p><strong>Relatório nostálgico:</strong><br>${faixa.texto}</p>` : '';
-      if (repeticoes >= 4) textoFaixa += '<p><strong>Não brinca?</strong></p>';
+
+      if (repeticoes >= 3) {
+        textoFaixa += '<p><strong>Sério? Estude mais!</strong></p>';
+      }
+
+      if (tempoNaEscola < 0 && repeticoes > 0) {
+        textoFaixa += '<p><strong>Caramba! Sua situação não está legal mesmo! Repetiu antes de entrar na escola</strong></p>';
+      } else if (repeticoes > tempoNaEscola) {
+        textoFaixa += '<p><strong>Caramba! Sua situação não está legal mesmo! Repetiu mais vezes do que estudou!</strong></p>';
+      }
 
       resultado.classList.remove('show');
       resultado.innerHTML = `
         <p><strong>Idade:</strong> ${idade} anos</p>
         <p><strong>Geração:</strong> ${geracao}</p>
-        <p><strong>Teve consciência estimada a partir de:</strong> ${anoConsciencia}</p>
+        <p><strong>Você começou a ter consciência da vida por volta de:</strong> ${anoConsciencia}</p>
         <p><strong>Provavelmente entrou na escola em:</strong> ${anoEscola}</p>
         <p><strong>Situação escolar:</strong> ${escolaridade}</p>
         ${textoFaixa}
